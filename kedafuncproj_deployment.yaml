@@ -7,34 +7,34 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: kedafuncproj
+  name: <>
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kedafuncproj
+  name: <>
   labels:
-    app: kedafuncproj
+    app: <>
 spec:
   selector:
     matchLabels:
-      app: kedafuncproj
+      app: <>
   template:
     metadata:
       labels:
-        app: kedafuncproj
+        app: <>
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: workload-identity-sa
       containers:
-      - name: kedafuncproj
+      - name:<>
         image: <>
         env:
         - name: AzureFunctionsJobHost__functions__0
-          value: ServiceBusFunc
+          value: <>
         envFrom:
         - secretRef:
-            name: kedafuncproj 
+            name: <>
         readinessProbe:
           failureThreshold: 3
           periodSeconds: 10
@@ -67,17 +67,17 @@ spec:
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
-  name: kedafuncproj
+  name: <>
   labels: {}
 spec:
   scaleTargetRef:
-    name: kedafuncproj
+    name: <>
   triggers:
   - type: azure-servicebus
     metadata:
       direction: In
-      queueName: upper-case
-      namespace: kedafuncsb
+      queueName:<>
+      namespace: <>
       cardinality: One
     authenticationRef:
       name: kedafuncsbtrigauth  
