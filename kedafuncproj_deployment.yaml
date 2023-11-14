@@ -1,0 +1,85 @@
+data:
+  AzureWebJobsStorage: VXNlRGV2ZWxvcG1lbnRTdG9yYWdlPXRydWU=
+  AzureWebJobsServiceBus__credential: bWFuYWdlZGlkZW50aXR5
+  AzureWebJobsServiceBus__fullyQualifiedNamespace: a2VkYWZ1bmNzYi5zZXJ2aWNlYnVzLndpbmRvd3MubmV0
+  AzureWebJobsServiceBus__clientId: N2E5ZjExNWEtOWRkMC00ZjVkLWIzMmEtY2UxMWJlM2NhYTNl
+  FUNCTIONS_WORKER_RUNTIME: ZG90bmV0LWlzb2xhdGVk
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kedafuncproj
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kedafuncproj
+  labels:
+    app: kedafuncproj
+spec:
+  selector:
+    matchLabels:
+      app: kedafuncproj
+  template:
+    metadata:
+      labels:
+        app: kedafuncproj
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: workload-identity-sa
+      containers:
+      - name: kedafuncproj
+        image: ramyaliftrdocker/kedafuncproj:v2
+        env:
+        - name: AzureFunctionsJobHost__functions__0
+          value: ServiceBusFunc
+        envFrom:
+        - secretRef:
+            name: kedafuncproj 
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 240
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+        startupProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 240
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: kedafuncsbtrigauth
+  namespace: default # must be same namespace as the ScaledObject
+spec:
+  podIdentity:
+      provider:  azure-workload  # Optional. Default: none
+      identityId: 7a9f115a-9dd0-4f5d-b32a-ce11be3caa3e
+---      
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: kedafuncproj
+  labels: {}
+spec:
+  scaleTargetRef:
+    name: kedafuncproj
+  triggers:
+  - type: azure-servicebus
+    metadata:
+      direction: In
+      queueName: upper-case
+      namespace: kedafuncsb
+      cardinality: One
+    authenticationRef:
+      name: kedafuncsbtrigauth  
+---
+
