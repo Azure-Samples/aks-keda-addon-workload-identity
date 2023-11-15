@@ -1,5 +1,5 @@
 # kedaaddon-AKS-WI-sample
-This is a sample to deploy an Azure Function Service Bus trigger using KEDA Add-on for AKS for scaling and connecting to Azure Service Bus using workload identity for AKS
+This is a sample to deploy an Azure Function Service Bus trigger using KEDA Add-on for AKS for scaling and connecting to Azure Service Bus using workload identity for AKS.
 Note: In this sample Az CLI and Azure Portal are being used.
 
 1. Login to Az CLI
@@ -23,15 +23,16 @@ Note: In this sample Az CLI and Azure Portal are being used.
    az aks get-credentials --resource-group <myResourceGroup> --name <myAKSCluster>
    ```
 8. Verify the KEDA add-on is installed on your cluster using the az aks show command and set the --query parameter to workloadAutoScalerProfile.keda.enabled.
+   
    ```sh
    az aks show -g <myResourceGroup> --name <myAKSCluster> --query "workloadAutoScalerProfile.keda.enabled"
-   The output shows as "true" if the KEDA add-on is installed on the cluster
+   The output shows as "true" if the KEDA add-on is installed on the AKS cluster
    ```
-9. Verify the KEDA add-on is running on your cluster using the kubectl get pods command.
+10. Verify the KEDA add-on is running on your cluster using the kubectl get pods command.
     ```sh
     kubectl get pods -n kube-system
     ```
-10. Now lets create a local Azure Function Service Bus trigger docker project , build and push the image to the container registry and finally deploy to the AKS cluster enabled with KEDA add-on. You may fork the sample Function app from this project or create an Azure Function from template.
+11. Now lets create a local Azure Function Service Bus trigger docker project , build and push the image to the container registry and finally deploy to the AKS cluster enabled with KEDA add-on. You may fork the sample Function app from this project or create an Azure Function from template.
     ```sh
     func init <ServiceBusProj> --worker-runtime dotnet-isolated --docker --target-framework net7.0
     func new --name <ServiceBusFunc> --template "ServiceBusQueueTrigger"
@@ -40,7 +41,7 @@ Note: In this sample Az CLI and Azure Portal are being used.
     docker push <registry/projname>:<version>
     func kubernetes deploy --name <projname>  --image-name <registry/projname>:<version> --dry-run >> kedafuncproj_deployment.yaml
     ```
-11. Workloads deployed on an Azure Kubernetes Services (AKS) cluster require Microsoft Entra application credentials or managed identities to access Microsoft Entra protected resources,such as Azure Service Bus in this case.
+12. Workloads deployed on an Azure Kubernetes Services (AKS) cluster require Microsoft Entra application credentials or managed identities to access Microsoft Entra protected resources,such as Azure Service Bus in this case.
 [Microsoft Entra Workload ID](https://learn.microsoft.com/en-us/azure/active-directory/develop/workload-identities-overview) uses [Service Account Token Volume Projection](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#serviceaccount-token-volume-projection) enabling pods to use a Kubernetes identity (that is, a service account). A Kubernetes token is issued and [OIDC federation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens) enables Kubernetes applications to access Azure resources securely with Microsoft Entra ID based on annotated service accounts.
 
 Run the following commands to create these variables. Replace the default values for RESOURCE_GROUP, LOCATION, SERVICE_ACCOUNT_NAME, SUBSCRIPTION, USER_ASSIGNED_IDENTITY_NAME, FEDERATED_IDENTITY_CREDENTIAL_NAME and KEDA_FEDERATED_IDENTITY_CREDENTIAL_NAME
