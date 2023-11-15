@@ -1,4 +1,4 @@
-# kedaaddon-AKS-WI-sample
+# KEDA Add-on for AKS and workload identity Sample
 This is a sample to deploy an Azure Function Service Bus trigger using KEDA Add-on for AKS for scaling and connecting to Azure Service Bus using workload identity for AKS.
 Note: In this sample Az CLI and Azure Portal are being used.
 
